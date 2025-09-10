@@ -8,9 +8,6 @@ RUN apt-get update && apt-get install -y \
 # Prevents Python from buffering stdout and stderr
 ENV PYTHONUNBUFFERED=1
 
-# Copy from the cache instead of linking since it's a mounted volume
-ENV UV_LINK_MODE=copy
-
 WORKDIR /app
 
 # Copy dependency files first for better caching
@@ -24,7 +21,10 @@ RUN pip install --no-cache-dir --upgrade pip && \
 COPY . .
 
 # Install project dependencies, sync to uv's lockfile
-RUN uv sync --frozen
+# Use --no-dev to avoid installing development dependencies in production
+# Set UV_SYSTEM_PYTHON to use the system Python instead of creating a venv
+ENV UV_SYSTEM_PYTHON=1
+RUN uv sync --frozen --no-dev
 
 # Expose the port
 EXPOSE 8080
