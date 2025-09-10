@@ -19,7 +19,7 @@ RUN rm -rf .venv
 ENV UV_SYSTEM_PYTHON=1
 
 # Install project dependencies, sync to uv's lockfile using system Python
-RUN uv sync --frozen --system
+RUN uv sync
 
 # Expose the port
 EXPOSE 8080
