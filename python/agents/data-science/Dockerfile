@@ -1,5 +1,10 @@
 FROM python:3.12-slim
 
+# Install system dependencies required for Python shared libraries
+RUN apt-get update && apt-get install -y \
+    libexpat1 \
+    && rm -rf /var/lib/apt/lists/*
+
 # Prevents Python from buffering stdout and stderr
 ENV PYTHONUNBUFFERED=1
 
@@ -7,18 +12,19 @@ ENV PYTHONUNBUFFERED=1
 ENV UV_LINK_MODE=copy
 
 WORKDIR /app
-COPY . .
 
-# Upgrade pip to the latest version
-RUN pip install --no-cache-dir --upgrade pip
-# Install uv
-RUN pip install --no-cache-dir uv>=0.7.19
-
-# Copy only the dependency files to leverage Docker layer caching
+# Copy only the dependency files first to leverage Docker layer caching
 COPY uv.lock pyproject.toml ./
+
+# Upgrade pip to the latest version and install uv
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir uv>=0.7.19
 
 # Install project dependencies, sync to uv's lockfile
 RUN uv sync --frozen
+
+# Copy the rest of the application code
+COPY . .
 
 # Expose the port
 EXPOSE 8080
