@@ -13,18 +13,18 @@ ENV UV_LINK_MODE=copy
 
 WORKDIR /app
 
-# Copy only the dependency files first to leverage Docker layer caching
+# Copy dependency files first for better caching
 COPY uv.lock pyproject.toml ./
 
 # Upgrade pip to the latest version and install uv
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir uv>=0.7.19
 
+# Copy the application code (needed for package building)
+COPY . .
+
 # Install project dependencies, sync to uv's lockfile
 RUN uv sync --frozen
-
-# Copy the rest of the application code
-COPY . .
 
 # Expose the port
 EXPOSE 8080
