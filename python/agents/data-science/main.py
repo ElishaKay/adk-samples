@@ -43,6 +43,9 @@ AGENT_DIR = os.path.dirname(os.path.abspath(__file__))
 # Get session service URI from environment variables
 session_uri = os.getenv("SESSION_SERVICE_URI", None)
 
+# Get session service URI from environment variables
+artifact_service_uri = os.getenv("ARTIFACT_SERVICE_URI", None)
+
 # Get Enable Web interface serving flag from environment variables
 # Set web=True if you intend to serve a web interface, False otherwise
 web_interface_enabled = os.getenv("SERVE_WEB_INTERFACE", 'False').lower() in ('true', '1')
@@ -57,6 +60,16 @@ else:
     logger.log_text(
         "SESSION_SERVICE_URI not provided. Using in-memory session service instead. "
         "All sessions will be lost when the server restarts.",
+        severity="WARNING",
+    )
+
+# Only include artifact_service_uri if it's provided
+if artifact_service_uri:
+    app_args["artifact_service_uri"] = artifact_service_uri
+else:
+    logger.log_text(
+        "ARTIFACT_SERVICE_URI not provided. Using in-memory artifact service instead. "
+        "All artifacts will be lost when the server restarts or redeploys.",
         severity="WARNING",
     )
 
